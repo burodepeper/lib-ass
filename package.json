@@ -7,7 +7,6 @@
     "url": "https://github.com/burodepeper/lib-ass/issues"
   },
   "license": "MIT",
-  "private": true,
   "dependencies": {
     "coffee-script": "1.7.0"
   },
