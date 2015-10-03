@@ -1,11 +1,12 @@
 {
   "name": "lib-ass",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Advanced Scope Selectors",
   "repository": "https://github.com/burodepeper/lib-ass",
   "bugs": {
     "url": "https://github.com/burodepeper/lib-ass/issues"
   },
+  "main": "lib/ass.coffee",
   "license": "MIT",
   "dependencies": {
     "coffee-script": "1.7.0"
