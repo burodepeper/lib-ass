@@ -1,2 +1,3 @@
 # lib-ass
-Advanced Scope Selectors
+
+Use ASS (Agile Scope Syntax) to describe and parse any syntax in a convenient nested structure.
