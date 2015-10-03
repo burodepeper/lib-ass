@@ -1,7 +1,7 @@
 {
   "name": "lib-ass",
   "version": "0.0.2",
-  "description": "Advanced Scope Selectors",
+  "description": "Agile Scope Syntax",
   "repository": "https://github.com/burodepeper/lib-ass",
   "bugs": {
     "url": "https://github.com/burodepeper/lib-ass/issues"
