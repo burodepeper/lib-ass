@@ -21,7 +21,7 @@ class ASStest
     if (@lines[0][0] is '@')
       @id = @lines.shift().substring(1)
     else
-      @id = @nr + 1
+      @id = 'test-'+(@nr + 1)
     console.log "  id: #{@id}"
 
   getInput: ->
@@ -48,6 +48,8 @@ class ASStest
 
   parseTokens: ->
     return
+
+  # ---------- V1 below ----------
 
   parseData: ->
     @input = ""
