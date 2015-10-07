@@ -1,5 +1,6 @@
 module.exports =
 class ASStest
+  nr: null
   id: null
   lines: null
   input: null
@@ -7,14 +8,48 @@ class ASStest
   currentScope: null
   isValid: false
 
-  constructor: (@id, @lines) ->
-    @parseData()
+  constructor: (@nr, @lines) ->
+    console.log ""
+    console.log "> new ASStest()", @nr, @lines.length
+    @getID()
+    @getInput()
+    @parseTokens()
+    # @parseData()
 
-  parseData: ->
-    # set @id if specified as first-line
+  # set @id if specified as first-line
+  getID: ->
     if (@lines[0][0] is '@')
       @id = @lines.shift().substring(1)
+    else
+      @id = @nr + 1
+    console.log "  id: #{@id}"
 
+  getInput: ->
+    @input = ""
+    while @lines.length and ((@lines[0][0] is '"') or (@lines[0][0] is "'"))
+      input = @lines.shift().trim()
+      lastCharacter = input[input.length - 1]
+      if (lastCharacter is '+') or (lastCharacter is '{')
+        # remove last character (either { or +), and trim whitespace
+        input = input.substring(0, input.length - 1).trim()
+        # remove encasing quotes
+        input = input.substring(1, input.length - 1)
+        # transform \n into proper new lines
+        input = input.replace(/\\n/g, '\n')
+        # insert a new line when concatenating multiple input lines
+        if @input then @input += '\n'
+        @input += input
+      else
+        # TODO immediately parse tokens, so @parseTokens() can be skipped
+        @input = input
+
+    console.log "  input: #{@input}"
+    return
+
+  parseTokens: ->
+    return
+
+  parseData: ->
     @input = ""
     while (@lines[0][0] is '"') or (@lines[0][0] is "'")
       input = @lines.shift()
