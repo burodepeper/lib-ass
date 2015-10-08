@@ -77,7 +77,7 @@ class ASStest
         line.input = test.input
         line.scope = null
 
-    else if input[0] is input[input.length - 1]
+    else if (input[0] is input[input.length - 1]) and (input[0] is "'" or input[0] is '"')
       line.type = 'token'
       line.input = input.substring(1, input.length - 1)
 
