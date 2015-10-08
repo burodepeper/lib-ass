@@ -9,8 +9,7 @@ class ASS
   constructor: (@rawData) ->
     start = new Date().getTime()
     @parseData()
-    console.log "====="
-    console.log "ASS.parseData() "+(new Date().getTime() - start)+"ms"
+    console.log "ASS.parseData() "+(new Date().getTime() - start)+" ms"
 
   parseData: ->
     @splitDataIntoLines()
@@ -27,15 +26,6 @@ class ASS
         lines.push(line)
     @lines = lines
 
-  # splitLinesIntoTests: ->
-  #   @tests = []
-  #   test = []
-  #   for line in @lines
-  #     test.push(line)
-  #     if line[0] is '}'
-  #       @tests.push(new ASStest(@tests.length, test))
-  #       test = []
-
   splitLinesIntoTests: ->
     @tests = []
     test = []
@@ -49,7 +39,6 @@ class ASS
         test = []
 
   addTest: (test) ->
-    # console.log "ASS.addTest()", test[0], test.length+" lines"
     if test.length > 1
       @tests.push(new ASStest(@tests.length, test))
 
