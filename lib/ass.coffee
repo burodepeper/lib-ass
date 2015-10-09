@@ -7,9 +7,7 @@ class ASS
   tests: null
 
   constructor: (@rawData) ->
-    start = new Date().getTime()
     @parseData()
-    console.log "ASS.parseData() "+(new Date().getTime() - start)+" ms"
 
   parseData: ->
     @splitDataIntoLines()
@@ -26,17 +24,32 @@ class ASS
         lines.push(line)
     @lines = lines
 
+    # console.log "-----"
+    # for line, l in @lines
+    #   console.log "#{l}: #{line}"
+    # console.log "-----"
+
   splitLinesIntoTests: ->
     @tests = []
     test = []
     for line in @lines
+
+      # new @id found, add (previous) test if not empty
       if line[0] is '@' and test.length
         @addTest(test)
         test = []
+
+      # add line to current test
       test.push(line)
+
+      # Closing curly brace
       if line[0] is '}'
         @addTest(test)
         test = []
+
+    # Add remains as a test too
+    if test.length
+      @addTest(test)
 
   addTest: (test) ->
     if test.length > 1

@@ -10,6 +10,8 @@ class ASStest
 
   constructor: (@nr, @lines) ->
     @getID()
+    # console.log "Test #{@nr}"
+    # console.log "  id: #{@id}"
     @parseInput()
     @parseTokens()
     @isValid = true if @input.length and @tokens.length
@@ -44,6 +46,7 @@ class ASStest
         # concatenate
         @input += input
 
+      # We have found a one-liner.Ignore any other (previous) lines of input, and create the token immediately
       else
         line = @parseLine(input)
         if line.type is 'input-and-scope'
@@ -51,10 +54,9 @@ class ASStest
           @tokens = []
           token =
             value: line.input
-            scopes: line.scope
+            scopes: [ line.scope ]
           @tokens.push(token)
 
-    # console.log "  input: #{@input}"
     return
 
   parseLine: (input) ->
