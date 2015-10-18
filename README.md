@@ -1,157 +1,309 @@
 # lib-ass
 
-Use Agile Semantics Syntax (ASS) to describe and parse any syntax in a convenient nested structure.
+Use **Agile Semantics Syntax** (ASS) to describe and parse any syntax or grammar in a convenient nested structure. `lib-ass` will convert your `.ass` files into a convenient `JSON`-object, and from there it is up to you.
 
-ASS originated from [language-markdown](https://atom.io/packages/language-markdown/) as a solution to make the automated testing of language-packs less dependent on Jasmine, increase speed and flexibility in writing tests, and simply less tedious.
+ [language-markdown](https://atom.io/packages/language-markdown/), where `lib-ass` originated from, makes heave use of `ASS` to increase the speed and flexibility of writing automated tests.
 
-**Notes**
-- The file format is not final yet
-- Syntax highlighting isn't final either
+---
 
-## What can I do with ASS?
+## Introduction
 
-`.ass` is a simple file format, in which you specify some input, and an expected (nested) output. The `ASS` class can then parse this file, and present `ASStest` objects which you can easily integrate into your automated testing workflow.
-
-### The .ass file-format
-
-The structure of an `.ass` file is kept as simple as possible. Not really, but it is quite simple. It looks a bit as the love-child of `json` and `css`. I think that's because the concept of nesting came from css, and it eventually becomes a json object.
-
-Anyway, I think an example and its result should be enough to give you an idea of how it all works. Because ASS can be used to describe any syntax (I think), the example below uses a simple English sentence. I hope I got the names for the grammatical stuff right.
-
-If you install [language-ass](https://atom.io/packages/language-ass) you'll get nice syntax highlighting as a bonus!
+Read up on [semantics](https://en.wikipedia.org/wiki/Semantics), and then let's look at a simple example.
 
 ```ass
-# Comments are optional, and can only start a the beginning of a line.
-# The @id below is optional too.
+"height: 188cm" {
+  attribute {
+    "height": key
+    ": "
+    "188cm": value
+  }
+}
+```
 
-@sentence
-"This is a sentence." {
-  english.text {
-    sentence {
-      "This": subject
-      " "
-      "is": verb
-      " "
-      object {
-        "a": article
-        " "
-        "sentence": noun
+We took the string `height: 188cm`, said it was an `attribute`, and then we split up the contents of the string, and described them into a `key` and a `value` part. We can even go a step further; the `value` consists of two separate semantic elements: an amount and a unit. Let's update our spec:
+
+```ass
+"height: 188cm" {
+  attribute {
+    "height": name
+    ": "
+    "188cm" {
+      value {
+        "188": amount
+        "cm": unit
       }
-      ".": punctuation
     }
   }
 }
 ```
 
-turns into an `ASStest` json object, which looks something like
+I have swapped the output `"188cm": value` for a new _input_, described it as a `value` as we did before, but now, I've also specified an `amount` and a `unit`.
 
-```json
-{
-  "id": "example",
-  "input": "This is a sentence.",
-  "tokens": [
-    {
-      "scopes": ["english.text", "sentence", "subject"],
-      "value": "This"
-    },
-    {
-      "scopes": ["english.text", "sentence"],
-      "value": " "
-    },
-    {
-      "scopes": ["english.text", "sentence", "verb"],
-      "value": "is"
-    },
-    {
-      "scopes": ["english.text", "sentence"],
-      "value": " "
-    },
-    {
-      "scopes": ["english.text", "sentence", "object", "article"],
-      "value": "a"
-    },
-    {
-      "scopes": ["english.text", "sentence", "object"],
-      "value": " "
-    },
-    {
-      "scopes": ["english.text", "sentence", "object", "noun"],
-      "value": "sentence"
-    },
-    {
-      "scopes": ["english.text", "sentence", "punctuation"],
-      "value": "."
-    }
-  ]
+When `lib-ass` parses this information, it checks its validity, and then converts it to a json-object with every scope resolved on every token. I used two new terms there, `scope` and `token`. Let's look at the semantic structure of our first `ass-test` to see what I mean by them.
+
+```
+<input> {
+  <scope-1> {
+    <token-1>: <scope-2>
+    <token-2>
+    <token-3>: <scope-3>
+  }
 }
 ```
 
-#### Another example
+I'm not a native English speaker, but in this context, `scope` can be described as a _meaning_, and `token` can be described as a _thing_. So if we translate the pseudo-code above to a 'normal' sentence, we'd get something like:
 
-Something a bit more programmy, something that is actually used at this moment, is the following description of a bit of `Markdown` which intentionally shows how to deal with multiple lines as input as well.
+> My `<input>` is a `<scope-1>` and consists of `<token-1>`, `<token-2>` and `<token-3>`. `<token-1>` is also a `<scope-2>`, and `<token-2>` is also a `<scope-3>`.
+
+The most interesting thing about this is that `<token-3>` is part of `<scope-1>` AND `<scope-3>`; scope-3 is just more specific than scope-1. We can now describe our `<tokens>` (or output) in the following way:
+
+- `<token-1>`: `<scope-1>` and `<scope-2>`
+- `<token-2>`: `<scope-1>`
+- `<token-3>`: `<scope-1>` and `<scope-3>`
+
+And that is exactly what `lib-ass` creates from our input, but then in the form of `json`. Whatever you do with that data is up to you. Along with the main library, it is our intention to release several ready-to-go implementations of automated tests that can be run.
+
+---
+
+## Syntax
+
+### File format
+
+An `.ass` file is a plain-text file that can contain `tests`, `comments` and blank lines. Comments are lines that start with a `#` (with optional leading whitespace). Tests are defined below. It is good practice (though optional) to separate your tests with at least a single blank line.
+
+### Test formats
+
+The syntax used in an `.ass` file consists of only a few forms. You can technically infinitely nest and combine these forms.
+
+There are two test formats: the single-line `<token-and-scope>` format, and the multi-line `<token-and-group>` format. Both of them can be preceded by an optional `<id>`.
+
+#### <token-and-scope>
+
+```
+<id> (optional)
+<token>: <scope>
+```
+
+#### <token-and-group>
+
+```
+<id> (optional)
+<token> {
+  <group>
+}
+```
+
+To specify an input `<token>` that consists of multiple lines, you can concatenate `<token>`s by using the following syntax:
+
+```
+<token-1> +
+<token-2> +
+<token-3> {
+  <group>
+}
+```
+
+### Data formats
+
+#### <id>
+
+An id is a line that starts with a `@` and ends at the end of the line. Any character is (technically) allowed in an `<id>`.
+
+#### <group>
+
+A group is a series of objects, grouped together between curly braces. Each object starts on a new line. Indentation within a group is optional, though highly recommended.
+
+The possible objects in a group are: `<token-and-scope>`, `<token-and-group>` and `<token>`. Blank lines and comments may also be part of a `<group>`.
+
+A test with a single `<group>` could look like this:
+
+```
+<id> (optional)
+<token> {
+  <token-and-scope>
+  <token>
+  <token-and-scope>
+  <token-and-group>
+}
+```
+
+#### <scope>
+
+A `<scope>` is a literal string, that depicts _meaning_.
+
+#### <token>
+
+A token is a string that starts and ends with either a single or a double quote, that depicts _content_.
+
+---
+
+## An advanced example
+
+The following example describes a piece of `scss` code in `.ass` and the `.json` (just the first bit, I'm lazy) it is converted to. At first glance, the `ASS` looks verbose, and I will immediately admit that it is. But it is also as verbose as you decide to make it. The good thing however is that repeating patterns do not rely on their contexts, and thus can be easily copy-and-pasted. Also, as a personal preference, I've describes several parts more verbose than they need to be; as an example, but also because it helps readibility and eases the re-usability of sections.
 
 ```ass
-"- alpha"+
-"- beta"+
-"- gamma" {
-  text.md {
-    unordered.list.markup.md {
-      "-": punctuation.md
-      " "
-      "alpha"
-      "-": punctuation.md
-      " "
-      "beta"
-      "-": punctuation.md
-      " "
-      "gamma"
+@scss-example
+"article {" +
+"  font: 12px/18px sans-serif;" +
+"  color: #000000;" +
+"" +
+"  p:not(:last-child) {" +
+"    margin-bottom: 9px;" +
+"  }" +
+"}" {
+  scss {
+    "article" {
+      selector {
+        "article": html-tag
+      }
     }
+    " "
+    "{": punctuation
+
+    "font: 12px/18px sans-serif;" {
+      declaration {
+        "font": property
+        ":": punctuation
+        " "
+        "12px" {
+          value {
+            size {
+              "12": amount
+              "px": unit
+            }
+          }
+        }
+        "/": punctuation
+        "18px" {
+          value {
+            size {
+              "18": amount
+              "px": unit
+            }
+          }
+        }
+        " "
+        "sans-serif": font-family
+        ";": punctuation
+      }
+    }
+
+    "color: #000000;" {
+      declaration {
+        "color": property
+        ":": punctuation
+        " "
+        "#000000" {
+          value {
+            color {
+              rgb {
+                "#": punctuation
+                "00": red
+                "00": green
+                "00": blue
+              }
+            }
+          }
+        }
+        ";": punctuation
+      }
+    }
+
+    # This is an empty line
+    ""
+
+    "p:not(:last-child)" {
+      selector {
+        "p": html-tag
+        ":not(:last-child)" {
+          pseudo-selector {
+            ":": punctuation
+            "not": name
+            "(": punctuation
+            ":last-child" {
+              pseudo-value {
+                ":": punctuation
+                "last-child"
+              }
+            }
+            ")": punctuation
+          }
+        }
+      }
+    }
+    " "
+    "{": punctuation
+
+    "margin-bottom: 9px;" {
+      declaration {
+        "margin-bottom": property
+        ":": punctuation
+        " "
+        "9px" {
+          value {
+            size {
+              "9": amount
+              "px": unit
+            }
+          }
+        }
+        ";": punctuation
+      }
+    }
+
+    "}": punctuation
+    "}": punctuation
   }
 }
 ```
 
-and the accompanying json
-
 ```json
 {
-  "id": 0,
-  "input": "- alpha\n- beta\n- gamma",
+  "id": "scss-example",
   "tokens": [
     {
-      "scopes": ["text.md", "unordered.list.markup.md", "punctuation.md"],
-      "value": "-"
+      "value": "article",
+      "scopes": ["scss", "selector", "html-tag"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md"],
-      "value": " "
+      "value": " ",
+      "scopes": ["scss"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md"],
-      "value": "alpha"
+      "value": "{",
+      "scopes": ["scss", "punctuation"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md", "punctuation.md"],
-      "value": "-"
+      "value": "font",
+      "scopes": ["scss", "declaration", "property"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md"],
-      "value": " "
+      "value": ":",
+      "scopes": ["scss", "declaration", "punctuation"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md"],
-      "value": "beta"
+      "value": " ",
+      "scopes": ["scss", "declaration"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md", "punctuation.md"],
-      "value": "-"
+      "value": "12",
+      "scopes": ["scss", "declaration", "value", "size", "amount"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md"],
-      "value": " "
+      "value": "px",
+      "scopes": ["scss", "declaration", "value", "size", "unit"]
     },
     {
-      "scopes": ["text.md", "unordered.list.markup.md"],
-      "value": "gamma"
+      "value": "",
+      "scopes": ["scss", "declaration", "punctuation"]
+    },
+    {
+      "value": "18",
+      "scopes": ["scss", "declaration", "value", "size", "amount"]
+    },
+    {
+      "value": "px",
+      "scopes": ["scss", "declaration", "value", "size", "unit"]
     }
   ]
 }
