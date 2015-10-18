@@ -77,14 +77,14 @@ The syntax used in an `.ass` file consists of only a few forms. You can technica
 
 There are two test formats: the single-line `<token-and-scope>` format, and the multi-line `<token-and-group>` format. Both of them can be preceded by an optional `<id>`.
 
-#### <token-and-scope>
+#### `<token-and-scope>`
 
 ```
 <id> (optional)
 <token>: <scope>
 ```
 
-#### <token-and-group>
+#### `<token-and-group>`
 
 ```
 <id> (optional)
@@ -105,11 +105,11 @@ To specify an input `<token>` that consists of multiple lines, you can concatena
 
 ### Data formats
 
-#### <id>
+#### `<id>`
 
 An id is a line that starts with a `@` and ends at the end of the line. Any character is (technically) allowed in an `<id>`.
 
-#### <group>
+#### `<group>`
 
 A group is a series of objects, grouped together between curly braces. Each object starts on a new line. Indentation within a group is optional, though highly recommended.
 
@@ -127,11 +127,11 @@ A test with a single `<group>` could look like this:
 }
 ```
 
-#### <scope>
+#### `<scope>`
 
 A `<scope>` is a literal string, that depicts _meaning_.
 
-#### <token>
+#### `<token>`
 
 A token is a string that starts and ends with either a single or a double quote, that depicts _content_.
 
@@ -140,6 +140,17 @@ A token is a string that starts and ends with either a single or a double quote,
 ## An advanced example
 
 The following example describes a piece of `scss` code in `.ass` and the `.json` (just the first bit, I'm lazy) it is converted to. At first glance, the `ASS` looks verbose, and I will immediately admit that it is. But it is also as verbose as you decide to make it. The good thing however is that repeating patterns do not rely on their contexts, and thus can be easily copy-and-pasted. Also, as a personal preference, I've describes several parts more verbose than they need to be; as an example, but also because it helps readibility and eases the re-usability of sections.
+
+```css
+article {
+  font: 12px/18px sans-serif;
+  color: #000000;
+
+  p:not(:last-child) {
+    margin-bottom: 9px;
+  }
+}
+```
 
 ```ass
 @scss-example
@@ -308,3 +319,5 @@ The following example describes a piece of `scss` code in `.ass` and the `.json`
   ]
 }
 ```
+
+etc.
