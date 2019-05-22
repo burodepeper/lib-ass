@@ -1,6 +1,6 @@
 {
   "name": "lib-ass",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Agile Semantics Syntax",
   "repository": "https://github.com/burodepeper/lib-ass",
   "bugs": {
@@ -9,7 +9,7 @@
   "main": "lib/ass.coffee",
   "license": "MIT",
   "dependencies": {
-    "coffee-script": "1.7.0"
+    "coffeescript": "^2.4.1"
   },
   "coffeelintConfig": {
     "max_line_length": {
